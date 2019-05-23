@@ -1,0 +1,19 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t roosevelt/test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run  roosevelt/test npm test -- --coverage
+
+after_succes:
+  - docker build -t roosevelt/client ./client
+  - docker build -t roosevelt/nginx ./nginx
+  - docker build -t roosevelt/server ./server
+  - docker build -t roosevelt/worker ./worker
+
+  - echo "$docker_password" | docker login -u "$docker_id" --password-stdin
+  - docker push roosevelt/client
+  - docker push roosevelt/nginx
+  - docker push roosevelt/server
+  - docker push roosevelt/worker
