@@ -1,19 +1,22 @@
 sudo: required
 services:
   - docker
+
 before_install:
-  - docker build -t roosevelt/test -f ./client/Dockerfile.dev ./client
+  - docker build -t roosevelt/react-test -f ./client/Dockerfile.dev ./client
+
 script:
-  - docker run  roosevelt/test npm test -- --coverage
+  - docker run roosevelt/react-test npm test -- --coverage
 
-after_succes:
-  - docker build -t roosevelt/client ./client
-  - docker build -t roosevelt/nginx ./nginx
-  - docker build -t roosevelt/server ./server
-  - docker build -t roosevelt/worker ./worker
-
-  - echo "$docker_password" | docker login -u "$docker_id" --password-stdin
-  - docker push roosevelt/client
-  - docker push roosevelt/nginx
-  - docker push roosevelt/server
-  - docker push roosevelt/worker
+after_success:
+  - docker build -t roosevelt/multi-client ./client
+  - docker build -t roosevelt/multi-nginx ./nginx
+  - docker build -t roosevelt/multi-server ./server
+  - docker build -t roosevelt/multi-worker ./worker
+  # log in to the docker cli
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # takes those images and push them to docker hub
+  - docker push roosevelt/multi-client
+  - docker push roosevelt/multi-nginx
+  - docker push roosevelt/multi-server
+  - docker push roosevelt/multi-worker
