@@ -1,0 +1,23 @@
+sudo: required
+language: node_js
+services:
+  - docker
+
+before_install:
+  - docker build -t roosevelt/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run roosevelt/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t roosevelt/multi-client ./client
+  - docker build -t roosevelt/multi-nginx ./nginx
+  - docker build -t roosevelt/multi-server ./server
+  - docker build -t roosevelt/multi-worker ./worker
+  # log in to the docker cli
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # takes those images and push them to docker hub
+  - docker push roosevelt/multi-client
+  - docker push roosevelt/multi-nginx
+  - docker push roosevelt/multi-server
+  - docker push roosevelt/multi-worker
